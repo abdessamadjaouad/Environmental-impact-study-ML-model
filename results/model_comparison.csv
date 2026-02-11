@@ -1,0 +1,5 @@
+Model,Accuracy,Precision,Recall,F1-Score,Train Time (s),Predict Time (s)
+Decision Tree,0.9590,0.9593,0.9590,0.9591,0.12,0.0015
+Random Forest,0.9621,0.9626,0.9621,0.9622,2.27,0.0774
+Neural Network (MLP),0.9625,0.9629,0.9625,0.9625,9.76,0.0199
+XGBoost,0.9613,0.9617,0.9613,0.9613,2.59,0.0945
