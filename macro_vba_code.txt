@@ -1,0 +1,276 @@
+============================================================
+MODULE: ThisWorkbook.cls
+============================================================
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_Base = "0{00020819-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Feuil1.cls
+============================================================
+Attribute VB_Name = "Feuil1"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Feuil2.cls
+============================================================
+Attribute VB_Name = "Feuil2"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Feuil3.cls
+============================================================
+Attribute VB_Name = "Feuil3"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Feuil4.cls
+============================================================
+Attribute VB_Name = "Feuil4"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Feuil5.cls
+============================================================
+Attribute VB_Name = "Feuil5"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Feuil6.cls
+============================================================
+Attribute VB_Name = "Feuil6"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Module1.bas
+============================================================
+Attribute VB_Name = "Module1"
+
+
+============================================================
+MODULE: Module2.bas
+============================================================
+Attribute VB_Name = "Module2"
+
+
+============================================================
+MODULE: Module3.bas
+============================================================
+Attribute VB_Name = "Module3"
+Private Sub Worksheet_Change(ByVal Target As Range)
+    If Not Intersect(Target, Me.Range("U2,U23,U37")) Is Nothing Then
+        Application.EnableEvents = False
+        On Error GoTo CleanExit
+        Call MettreAJourMatrice
+CleanExit:
+        Application.EnableEvents = True
+    End If
+End Sub
+
+
+
+
+============================================================
+MODULE: Module4.bas
+============================================================
+Attribute VB_Name = "Module4"
+
+
+
+
+============================================================
+MODULE: Module5.bas
+============================================================
+Attribute VB_Name = "Module5"
+
+
+============================================================
+MODULE: Module6.bas
+============================================================
+Attribute VB_Name = "Module6"
+
+
+============================================================
+MODULE: UserForm1.frm
+============================================================
+Attribute VB_Name = "UserForm1"
+Attribute VB_Base = "0{5BF81468-7C69-49CA-9C2D-2D7F8A74F365}{311E8E01-BDBC-49BC-815F-16325A5A600B}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = False
+
+
+============================================================
+MODULE: Module7.bas
+============================================================
+Attribute VB_Name = "Module7"
+
+
+============================================================
+MODULE: Module8.bas
+============================================================
+Attribute VB_Name = "Module8"
+
+
+============================================================
+MODULE: Module9.bas
+============================================================
+Attribute VB_Name = "Module9"
+
+
+============================================================
+MODULE: Module10.bas
+============================================================
+Attribute VB_Name = "Module10"
+
+
+
+
+
+
+============================================================
+MODULE: Feuil7.cls
+============================================================
+Attribute VB_Name = "Feuil7"
+Attribute VB_Base = "0{00020820-0000-0000-C000-000000000046}"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Attribute VB_TemplateDerived = False
+Attribute VB_Customizable = True
+
+
+============================================================
+MODULE: Module11.bas
+============================================================
+Attribute VB_Name = "Module11"
+
+
+============================================================
+MODULE: Module12.bas
+============================================================
+Attribute VB_Name = "Module12"
+
+
+============================================================
+MODULE: Module13.bas
+============================================================
+Attribute VB_Name = "Module13"
+
+
+
+============================================================
+MODULE: Module14.bas
+============================================================
+Attribute VB_Name = "Module14"
+
+
+============================================================
+MODULE: Module15.bas
+============================================================
+Attribute VB_Name = "Module15"
+
+
+
+============================================================
+MODULE: Module16.bas
+============================================================
+Attribute VB_Name = "Module16"
+
+
+
+
+
+============================================================
+MODULE: Module17.bas
+============================================================
+Attribute VB_Name = "Module17"
+Sub CalculMilieux_Moyenne_Seule()
+
+    ' Exclure la feuille PRE construction
+    If ActiveSheet.Name = "PRE construction" Then
+        MsgBox "Cette macro ne s'applique pas à la feuille PRE construction.", vbExclamation
+        Exit Sub
+    End If
+
+    Dim ws As Worksheet
+    Dim i As Long, lastRow As Long
+    Dim Cm As Variant, Cr As Variant, Cf As Double
+    Dim Vm As Double, Vr As Double
+    
+    Vm = 1000
+    Vr = 100
+    
+    Set ws = ActiveSheet
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    For i = 2 To lastRow
+        Cm = ws.Cells(i, 6).Value
+        Cr = ws.Cells(i, 10).Value
+        
+        If Not IsNumeric(Cm) Then Cm = 0
+        If Not IsNumeric(Cr) Then Cr = 0
+        
+        Cf = (Cm * Vm + Cr * Vr) / (Vm + Vr)
+        
+        ws.Cells(i, 11).Value = Round(Cf, 3)
+    Next i
+    
+    MsgBox "Calcul des moyennes pondérées terminé, résultats en colonne K.", vbInformation
+
+End Sub
+
+
+

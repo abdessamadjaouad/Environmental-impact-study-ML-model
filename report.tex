@@ -1,0 +1,381 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{float}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, urlcolor=blue!60!black}
+
+% Simple code style
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    framerule=0pt,
+    breaklines=true,
+    columns=fullflexible,
+}
+
+% Title
+\title{
+    \vspace{-1cm}
+    \textbf{Reducing Input Parameters for \\Environmental Impact Assessment}\\[0.3cm]
+    \large Using Machine Learning and Feature Selection\\[0.2cm]
+    \normalsize PFE Project Report
+}
+\author{Abdessamad JAOUAD}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+
+% ============================================================
+\section{Introduction}
+% ============================================================
+
+In Morocco, any big project like a wind farm or a solar panel installation needs an Environmental Impact Assessment (EIA). This is required by law (Law 12-03, updated by Law 49-17). The goal of the EIA is to measure how much the project affects the environment in different areas: water quality, soil quality, air quality, etc.
+
+The company JESA uses an Excel spreadsheet for this process. The spreadsheet has an ``Exploitation'' sheet where the user has to fill \textbf{52 rows} of environmental measurements. Each row is a parameter like temperature, pH, lead concentration, etc. After filling all 52 rows, the spreadsheet calculates the final impact verdict (called ``matrice d'impact'') for 8 component groups.
+
+\textbf{The problem:} Filling 52 rows takes a lot of time and effort. Some of these parameters might not even be important for the final result. So our question was: \textit{can we reduce the number of rows the user needs to fill while still getting an accurate result?}
+
+\textbf{Our goal:} Find the minimum set of parameters that gives at least 95\% accuracy on the final impact verdict, and build a simplified tool that only asks for those parameters.
+
+% ============================================================
+\section{Understanding the Excel Logic}
+% ============================================================
+
+Before doing anything with machine learning, we first had to understand exactly how the Excel spreadsheet works.
+
+\subsection{How the Scoring Works}
+
+For each parameter (row), the user enters a measured value. The spreadsheet then:
+
+\begin{enumerate}
+    \item Compares the value against a predefined acceptable range
+    \item Assigns a \textbf{score}: 0 (normal), 1 (slight deviation), or 2 (major deviation)
+    \item Calculates a ``rejection score'' using a formula that combines the measured and range values
+\end{enumerate}
+
+\subsection{How the Impact is Calculated}
+
+For each component group (like Water or Soil), the spreadsheet:
+
+\begin{enumerate}
+    \item Takes the \textbf{average} of all measured scores in that group
+    \item Takes the \textbf{average} of all rejection scores in that group
+    \item Classifies these averages into text categories (Faible, Moyenne, Forte)
+    \item Uses a decision tree of IF/ELSE conditions to determine the final verdict
+\end{enumerate}
+
+The final verdict is one of: \textbf{Mineure} (minor), \textbf{Moyenne} (medium), or \textbf{Majeure} (major).
+
+\subsection{The 8 Component Groups}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Group} & \textbf{Parameters} & \textbf{Type} \\
+\midrule
+Eau (Water) & 21 & Standard \\
+Sol (Soil) & 14 & Standard \\
+Air & 7 & Standard \\
+Population & 4 & Standard \\
+Sant\'e (Health) & 3 & Standard \\
+Paysage (Landscape) & 1 & Special \\
+Infrastructure & 1 & Special \\
+Emploi (Employment) & 1 & Special \\
+\midrule
+\textbf{Total} & \textbf{52} & \\
+\bottomrule
+\end{tabular}
+\caption{The 8 component groups and their parameter counts.}
+\end{table}
+
+\subsection{Python Calculator}
+
+We built a Python version of the Excel calculator (\texttt{eie\_calculator\_v2.py}) that reproduces all the formulas. This was important because we needed a fast way to generate training data. The calculator was verified against the original Excel and matched 14 out of 15 test cases (93.3\% match).
+
+% ============================================================
+\section{Approach 1: Direct ML Feature Elimination}
+% ============================================================
+
+\subsection{The Idea}
+
+Our first idea was simple: train a machine learning model (XGBoost) to predict the impact verdict from all 52 parameters, then remove the least important ones one by one until accuracy drops below 95\%.
+
+\subsection{Dataset Generation}
+
+We generated a synthetic dataset with 100,000 rows. Each row represents one complete filled spreadsheet:
+
+\begin{itemize}
+    \item \textbf{Features}: 103 columns (49 parameters $\times$ 2 scores + 3 special + 2 categorical)
+    \item \textbf{Targets}: 8 columns (one verdict per group)
+    \item \textbf{Score distribution}: 55\% score 0, 25\% score 1, 20\% score 2
+\end{itemize}
+
+Each parameter's score was generated independently and randomly.
+
+\subsection{Results}
+
+We trained one XGBoost model per group and did backward elimination, removing parameters one at a time:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Group} & \textbf{Before} & \textbf{After} & \textbf{Removed} \\
+\midrule
+Eau & 21 & 20 & 1 \\
+Sol & 14 & 14 & 0 \\
+Air & 7 & 7 & 0 \\
+Population & 4 & 4 & 0 \\
+Sant\'e & 3 & 3 & 0 \\
+\midrule
+\textbf{Total} & \textbf{52} & \textbf{51} & \textbf{1} \\
+\bottomrule
+\end{tabular}
+\caption{Approach 1 results -- almost nothing was removable.}
+\end{table}
+
+\subsection{Why It Failed}
+
+When we analyzed the formula more carefully, we found the reason: the Excel uses \textbf{AVERAGE(all scores)} to compute the group score. This means every single parameter has \textbf{exactly equal weight}. Removing any one parameter shifts the average, which can change the classification. With 21 water parameters, each one is about 4.8\% of the average -- just enough to flip the result.
+
+\textbf{Lesson:} You cannot reduce parameters in an AVERAGE-based formula when all parameters are generated independently.
+
+% ============================================================
+\section{Approach 2: Statistical Subset Sampling}
+% ============================================================
+
+\subsection{The Idea}
+
+If the formula uses AVERAGE, maybe we can estimate the average from a smaller sample? Like polling -- you don't ask everyone, you ask a representative subset.
+
+\subsection{Test}
+
+We ran 50,000 simulations: generate 21 random scores, compute the full average and its classification, then compute the average of a random subset and check if it gives the same classification.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cc}
+\toprule
+\textbf{Subset Size (out of 21)} & \textbf{Same Classification} \\
+\midrule
+15 & 83.7\% \\
+10 & 69.9\% \\
+8 & 64.0\% \\
+5 & 59.0\% \\
+\bottomrule
+\end{tabular}
+\caption{Subset sampling accuracy -- too noisy to be reliable.}
+\end{table}
+
+\subsection{Why It Failed}
+
+Even with 15 out of 21 parameters, we only get 83.7\% accuracy. The classification boundaries (at average = 0.5 and 1.0) are too sensitive. A small difference in the average is enough to cross a boundary and change the verdict.
+
+\textbf{Lesson:} Random sampling cannot approximate the average well enough when classification thresholds are involved.
+
+% ============================================================
+\section{Approach 3: Domain-Based Filtering}
+% ============================================================
+
+\subsection{The Idea}
+
+We searched the web for which environmental parameters are actually relevant for wind and solar farms. For example, mercury and arsenic contamination don't happen in wind farms -- there's no industrial discharge. So maybe we can remove those ``irrelevant'' parameters?
+
+\subsection{Results}
+
+We identified 27 potentially removable parameters based on domain knowledge. But when we trained ML models on only the remaining ones, accuracy dropped below 95\%. The auto-add-back process ended up adding almost everything back:
+
+\begin{itemize}
+    \item Eau: started with 8 ``relevant'' params, had to add 12 back $\rightarrow$ 20/21
+    \item Sol: started with 4, had to add all 10 back $\rightarrow$ 14/14
+    \item Air: started with 3, had to add all 4 back $\rightarrow$ 7/7
+\end{itemize}
+
+\subsection{Why It Failed}
+
+Same root cause: the AVERAGE formula doesn't care about domain relevance. Even if a parameter is always score 0 (normal), it still contributes to the average. Removing a bunch of zeros raises the average and changes the result.
+
+But this step also revealed something important: \textit{the problem is that our synthetic data treats all parameters as independent random variables.}
+
+% ============================================================
+\section{Approach 4: Correlated Data + Sentinel Selection}
+\label{sec:final}
+% ============================================================
+
+\subsection{The Key Insight}
+
+In real environmental data, parameters don't move independently. When water is contaminated with lead, it's likely also contaminated with cadmium, chrome, and other heavy metals. When soil is disturbed, permeability, organic matter, and carbon all change together.
+
+This means that parameters within the same \textit{cluster} are highly correlated. If you know one parameter from the cluster, you can reasonably predict the others. So instead of measuring all 8 heavy metals in water, maybe measuring 2--3 ``sentinels'' is enough.
+
+\subsection{Correlation Clusters}
+
+We defined the following clusters based on environmental science:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llc}
+\toprule
+\textbf{Group} & \textbf{Cluster} & \textbf{Parameters} \\
+\midrule
+\multirow{5}{*}{Eau} & Physical (temp, pH, turbidity, conductivity) & 4 \\
+ & Organic (DBO5, DCO, dissolved O$_2$) & 3 \\
+ & Nutrients (nitrates, nitrites, ammonia, P, N) & 5 \\
+ & Heavy metals (Pb, Cd, Cr, Cu, Zn, Ni, Hg, As) & 8 \\
+ & Chemical (hydrocarbons) & 1 \\
+\midrule
+\multirow{4}{*}{Sol} & Physical (pH, permeability) & 2 \\
+ & Organic (organic matter, organic carbon) & 2 \\
+ & Heavy metals (Pb, Cd, Hg, As, Cr, Cu, Zn, Ni) & 8 \\
+ & Nutrients (N, P) & 2 \\
+\midrule
+\multirow{2}{*}{Air} & Particles (dust, PM10, PM2.5) & 3 \\
+ & Gases (SO$_2$, NOx, CO, ozone) & 4 \\
+\bottomrule
+\end{tabular}
+\caption{Correlation clusters -- parameters within a cluster tend to move together.}
+\end{table}
+
+\subsection{Correlated Data Generation}
+
+We generated a new dataset where parameters within the same cluster are \textbf{correlated} (not independent):
+
+\begin{enumerate}
+    \item For each cluster, pick a ``cluster state'' (0, 1, or 2)
+    \item Each parameter in the cluster follows the cluster state with 70\% probability
+    \item With 30\% probability, the parameter deviates slightly
+\end{enumerate}
+
+This gives a realistic within-cluster correlation of about \textbf{0.83}, meaning if one heavy metal has score 2, the others are very likely to also have score 1 or 2.
+
+\subsection{Sentinel Selection Process}
+
+The process works like this:
+
+\begin{enumerate}
+    \item Start with 1 ``sentinel'' parameter per cluster (the most representative one)
+    \item Train XGBoost on just the sentinels
+    \item If accuracy is below 95\%, add 1 more sentinel per cluster
+    \item If still below 95\%, add individual parameters one at a time (greedy: pick the one that improves accuracy the most)
+    \item Stop when accuracy reaches 95\%
+\end{enumerate}
+
+\subsection{Final Results}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccp{4cm}c}
+\toprule
+\textbf{Group} & \textbf{Before} & \textbf{After} & \textbf{Cut} & \textbf{Removed} & \textbf{Accuracy} \\
+\midrule
+Eau & 21 & 16 & 5 & conductivit\'e, O$_2$ dissous, ammoniac, zinc, nickel & 95.1\% \\
+Sol & 14 & 9 & 5 & mercure, arsenic, cuivre, zinc, nickel & 95.5\% \\
+Air & 7 & 5 & 2 & PM2.5, ozone & 96.2\% \\
+Population & 4 & 3 & 1 & radiation onduleurs & 96.0\% \\
+Sant\'e & 3 & 2 & 1 & s\'ecurit\'e & 95.8\% \\
+\midrule
+\textbf{Total} & \textbf{52} & \textbf{38} & \textbf{14} & & $\geq$\textbf{95\%} \\
+\bottomrule
+\end{tabular}
+\caption{Final results -- 27\% reduction in input parameters.}
+\end{table}
+
+The model we used is \textbf{XGBoost} (Extreme Gradient Boosting), a tree-based ensemble method. We trained one model per component group. Each model takes the sentinel parameter scores + \'etendue + dur\'ee as input and directly predicts the final importance verdict.
+
+\subsection{Per-Class Accuracy}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Group} & \textbf{Overall} & \textbf{Mineure} & \textbf{Moyenne} & \textbf{Majeure} \\
+\midrule
+Eau & 95.1\% & 97.6\% & 89.7\% & 90.7\% \\
+Sol & 95.5\% & 97.9\% & 88.5\% & 93.4\% \\
+Air & 96.2\% & 98.3\% & 90.9\% & 93.8\% \\
+Population & 96.0\% & 98.4\% & 87.6\% & 93.5\% \\
+Sant\'e & 95.8\% & 99.8\% & 82.1\% & 88.0\% \\
+\bottomrule
+\end{tabular}
+\caption{Per-class accuracy. Mineure (most common) has the highest accuracy.}
+\end{table}
+
+% ============================================================
+\section{Tools and Technologies}
+% ============================================================
+
+\begin{itemize}
+    \item \textbf{Python 3} -- main programming language
+    \item \textbf{XGBoost} -- machine learning model for classification
+    \item \textbf{scikit-learn} -- data splitting, encoding, evaluation metrics
+    \item \textbf{pandas / NumPy} -- data manipulation and generation
+    \item \textbf{matplotlib} -- plots and visualization
+\end{itemize}
+
+% ============================================================
+\section{Files Produced}
+% ============================================================
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{File} & \textbf{Description} \\
+\midrule
+\texttt{eie\_calculator\_v2.py} & Python calculator that reproduces Excel formulas \\
+\texttt{generate\_dataset\_v4.py} & Generates correlated synthetic dataset \\
+\texttt{sentinel\_elimination.py} & Runs the sentinel selection algorithm \\
+\texttt{simplified\_predictor.py} & Interactive predictor (38 inputs instead of 52) \\
+\texttt{sentinel\_parameters.json} & Lists kept/removed parameters per group \\
+\texttt{eie\_correlated.csv} & Training dataset (100,000 rows) \\
+\bottomrule
+\end{tabular}
+\caption{Project deliverables.}
+\end{table}
+
+% ============================================================
+\section{Summary of Challenges}
+% ============================================================
+
+\begin{enumerate}
+    \item \textbf{Understanding the Excel}: The spreadsheet had complex nested formulas and VBA macros. We had to reverse-engineer everything to build the Python calculator.
+    
+    \item \textbf{The AVERAGE problem}: The formula gives equal weight to all parameters. This makes direct elimination almost impossible because every parameter matters equally.
+    
+    \item \textbf{Independent data is useless}: When all parameters are randomly generated with no correlation, you cannot reduce any of them. The model has no patterns to exploit.
+    
+    \item \textbf{Finding the right data structure}: The key breakthrough was realizing that real environmental parameters are correlated. Once we generated data with realistic correlations, the sentinel approach worked.
+\end{enumerate}
+
+% ============================================================
+\section{Conclusion}
+% ============================================================
+
+We successfully reduced the number of input parameters from \textbf{52 to 38} (a 27\% reduction) while maintaining at least 95\% accuracy on all component groups. The user now fills 14 fewer rows, which saves time and effort.
+
+The approach that worked was:
+\begin{enumerate}
+    \item Generate synthetic data with realistic \textbf{correlations} between parameters
+    \item Use \textbf{sentinel selection} to pick representative parameters from each cluster
+    \item Train \textbf{XGBoost} models to predict the impact directly from the reduced set
+\end{enumerate}
+
+The simplified predictor is implemented as a Python script (\texttt{simplified\_predictor.py}) that can be used immediately. A web application version is planned for the future.
+
+\end{document}

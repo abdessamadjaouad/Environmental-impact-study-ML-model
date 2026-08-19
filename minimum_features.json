@@ -1,0 +1,97 @@
+{
+  "eau": {
+    "features": [
+      "etendue",
+      "duree",
+      "eau_hydrocarbures_score_m",
+      "eau_dco_score_m",
+      "eau_ph_score_m",
+      "eau_turbidite_score_m",
+      "eau_cadmium_score_m",
+      "eau_conductivite_score_m",
+      "eau_nitrates_score_m",
+      "eau_dbo5_score_m",
+      "eau_arsenic_score_m",
+      "eau_ammoniac_score_m",
+      "eau_cuivre_score_m",
+      "eau_plomb_score_m",
+      "eau_oxygene_dissous_score_m",
+      "eau_temperature_score_m",
+      "eau_azote_score_m",
+      "eau_chrome_score_m",
+      "eau_zinc_score_m",
+      "eau_nitrites_score_m",
+      "eau_mercure_score_m",
+      "eau_nickel_score_m"
+    ],
+    "accuracy": 0.95235
+  },
+  "sol": {
+    "features": [
+      "etendue",
+      "duree",
+      "sol_chrome_score_m",
+      "sol_cadmium_score_m",
+      "sol_arsenic_score_m",
+      "sol_zinc_score_m",
+      "sol_cuivre_score_m",
+      "sol_matiere_organique_score_m",
+      "sol_phosphore_score_m",
+      "sol_carbone_organique_score_m",
+      "sol_nickel_score_m",
+      "sol_ph_score_m",
+      "sol_azote_score_m",
+      "sol_permeabilite_score_m",
+      "sol_mercure_score_m",
+      "sol_plomb_score_m"
+    ],
+    "accuracy": 0.9525
+  },
+  "air": {
+    "features": [
+      "etendue",
+      "duree",
+      "air_pm10_score_m",
+      "air_nox_score_m",
+      "air_co_score_m",
+      "air_poussieres_score_m",
+      "air_so2_score_m",
+      "air_pm25_score_m",
+      "air_ozone_score_m",
+      "air_ozone_score_r",
+      "air_co_score_r",
+      "air_pm25_score_r",
+      "air_poussieres_score_r",
+      "air_so2_score_r",
+      "air_nox_score_r"
+    ],
+    "accuracy": 0.9561
+  },
+  "population": {
+    "features": [
+      "duree",
+      "etendue",
+      "population_radiation_onduleurs_score_m",
+      "population_radiation_eoliennes_score_m",
+      "population_radiation_cables_score_m",
+      "population_qualite_vie_score_m",
+      "population_radiation_onduleurs_score_r",
+      "population_qualite_vie_score_r",
+      "population_radiation_eoliennes_score_r"
+    ],
+    "accuracy": 0.9583
+  },
+  "sante": {
+    "features": [
+      "etendue",
+      "duree",
+      "sante_risques_electriques_score_m",
+      "sante_poussieres_score_m",
+      "sante_securite_score_m",
+      "sante_poussieres_score_r",
+      "sante_securite_score_r",
+      "sante_risques_electriques_score_r"
+    ],
+    "accuracy": 0.9995
+  }
+}

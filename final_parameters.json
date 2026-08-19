@@ -1,0 +1,86 @@
+{
+  "groups": {
+    "eau": {
+      "kept": [
+        "temperature",
+        "ph",
+        "turbidite",
+        "conductivite",
+        "dbo5",
+        "dco",
+        "oxygene_dissous",
+        "nitrates",
+        "ammoniac",
+        "phosphore",
+        "nitrites",
+        "plomb",
+        "nickel",
+        "azote",
+        "zinc",
+        "arsenic",
+        "hydrocarbures",
+        "chrome",
+        "mercure",
+        "cadmium"
+      ],
+      "removed": [
+        "cuivre"
+      ],
+      "accuracy": 0.9532
+    },
+    "sol": {
+      "kept": [
+        "ph",
+        "permeabilite",
+        "matiere_organique",
+        "carbone_organique",
+        "nickel",
+        "cuivre",
+        "arsenic",
+        "plomb",
+        "chrome",
+        "zinc",
+        "cadmium",
+        "mercure",
+        "phosphore",
+        "azote"
+      ],
+      "removed": [],
+      "accuracy": 0.95975
+    },
+    "air": {
+      "kept": [
+        "poussieres",
+        "pm10",
+        "pm25",
+        "nox",
+        "co",
+        "ozone",
+        "so2"
+      ],
+      "removed": [],
+      "accuracy": 0.96705
+    },
+    "population": {
+      "kept": [
+        "radiation_eoliennes",
+        "radiation_cables",
+        "radiation_onduleurs",
+        "qualite_vie"
+      ],
+      "removed": [],
+      "accuracy": 0.9976
+    },
+    "sante": {
+      "kept": [
+        "poussieres",
+        "risques_electriques",
+        "securite"
+      ],
+      "removed": [],
+      "accuracy": 0.9996
+    }
+  },
+  "total_original": 52,
+  "total_reduced": 51
+}
